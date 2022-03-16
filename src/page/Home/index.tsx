@@ -1,39 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import { fetchCities, postCity } from '../../api/cities';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 
+import { fetchCities, postCity } from '../../api/cities';
 import { CityCard } from '../../components/CityCard';
 import { ISummarizedCity } from '../../types/City';
 import './styles.css';
 
-function Home() {
-  const [cities, setCities] = useState<ISummarizedCity[]>();
-  const [loading, setLoading] = useState(true);
+const CITIES_QUERY_KEY = 'client';
 
-  const submitCity = async (e: any) => {
+function Home() {
+  const queryClient = useQueryClient();
+  const { data: cities, isLoading } = useQuery(CITIES_QUERY_KEY, fetchCities);
+
+  const citiesMutation = useMutation(postCity, {
+    onMutate: async (newCityName) => {
+      await queryClient.cancelQueries(CITIES_QUERY_KEY);
+
+      const previousState = queryClient.getQueryData(CITIES_QUERY_KEY);
+
+      const optimisticCity = {
+        name: newCityName
+      }
+
+      queryClient.setQueriesData<Partial<ISummarizedCity>[]>(CITIES_QUERY_KEY, (currCities) => {
+        return [...(currCities ?? []), optimisticCity]
+      })
+
+      return { previousState }
+    },
+    onError: (err, newCityName, context) => {
+      const { previousState } = context as { previousState: ISummarizedCity[] };
+
+      queryClient.setQueryData(CITIES_QUERY_KEY, previousState);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(CITIES_QUERY_KEY);
+    }
+  })
+
+  const submitCity = (e: any) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
 
     const name = formData.get('cityName') as string;
 
-    const newCity = await postCity(name);
-
-    setCities(cities ? [...cities, newCity] : [newCity]);
+    citiesMutation.mutate(name);
   }
 
-  useEffect(() => {
-    fetchCities().then(data => {
-      setCities(data);
-    })
-  }, [])
-
-  useEffect(() => {
-    if (cities) {
-      setLoading(false);
-    }
-  }, [cities])
-
-  if (loading || !cities) {
+  if (isLoading || !cities) {
     return <div>Loading...</div>
   }
 
@@ -55,6 +70,7 @@ function Home() {
             temperature={city.temp}
             icon={city.icon} 
             id={city.id}
+            key={city.id}
           />
         ))}
       </main>

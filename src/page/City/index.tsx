@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
 
 import { fetchCity } from '../../api/cities';
@@ -7,22 +8,11 @@ import { ICity } from '../../types/City';
 import './styles.css'
 
 const City = () => {
-  const [city, setCity] = useState<ICity>();
-  const [loading, setLoading] = useState(true);
+  const { id } = useParams(); 
 
-  const { id } = useParams();
+  const { data: city, isLoading } = useQuery(`city[${id}]`, () => fetchCity(id as string));
 
-  useEffect(() => {
-    fetchCity(id as string).then(data => setCity(data))
-  }, [id])
-
-  useEffect(() => {
-    if (city) {
-      setLoading(false)
-    }
-  }, [city])
-
-  if (loading || !city) {
+  if (isLoading || !city) {
     return <div>Loading...</div>
   }
 
