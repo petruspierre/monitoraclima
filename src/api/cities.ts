@@ -9,4 +9,12 @@ const fetchCity = (id: string) => {
   return api.get<ICity>(`/cities/${id}`).then(response => response.data);
 }
 
-export { fetchCities, fetchCity };
+const postCity = (name: string) => {
+  const data = {
+    name
+  }
+
+  return api.post<ISummarizedCity>('/cities', data).then(response => response.data);
+}
+
+export { fetchCities, fetchCity, postCity };

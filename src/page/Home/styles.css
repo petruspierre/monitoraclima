@@ -31,3 +31,7 @@ form button {
   border-radius: 0 0.5rem 0.5rem 0;
   cursor: pointer;
 }
+
+.city-card + .city-card {
+  margin-top: 0.75rem;
+}

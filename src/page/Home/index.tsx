@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchCities } from '../../api/cities';
+import { fetchCities, postCity } from '../../api/cities';
 
 import { CityCard } from '../../components/CityCard';
 import { ISummarizedCity } from '../../types/City';
@@ -9,18 +9,16 @@ function Home() {
   const [cities, setCities] = useState<ISummarizedCity[]>();
   const [loading, setLoading] = useState(true);
 
-  const submitCity = (e: any) => {
+  const submitCity = async (e: any) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
 
-    const name = formData.get('cityName');
+    const name = formData.get('cityName') as string;
 
-    const newCity = {
-      name
-    }
+    const newCity = await postCity(name);
 
-    console.log(newCity)
+    setCities(cities ? [...cities, newCity] : [newCity]);
   }
 
   useEffect(() => {
