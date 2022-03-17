@@ -9,18 +9,6 @@ function Home() {
   const [cities, setCities] = useState<ISummarizedCity[]>();
   const [loading, setLoading] = useState(true);
 
-  const submitCity = async (e: any) => {
-    e.preventDefault();
-
-    const formData = new FormData(e.currentTarget);
-
-    const name = formData.get('cityName') as string;
-
-    const newCity = await postCity(name);
-
-    setCities(cities ? [...cities, newCity] : [newCity]);
-  }
-
   useEffect(() => {
     fetchCities().then(data => {
       setCities(data);
@@ -32,6 +20,18 @@ function Home() {
       setLoading(false);
     }
   }, [cities])
+
+  const submitCity = async (e: any) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const name = formData.get('cityName') as string;
+
+    const newCity = await postCity(name);
+
+    setCities(cities ? [...cities, newCity] : [newCity]);
+  }
 
   if (loading || !cities) {
     return <div>Loading...</div>
