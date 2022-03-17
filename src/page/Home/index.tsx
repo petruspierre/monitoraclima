@@ -6,7 +6,7 @@ import { CityCard } from '../../components/CityCard';
 import { ISummarizedCity } from '../../types/City';
 import './styles.css';
 
-const CITIES_QUERY_KEY = 'client';
+const CITIES_QUERY_KEY = 'cities';
 
 function Home() {
   const queryClient = useQueryClient();
